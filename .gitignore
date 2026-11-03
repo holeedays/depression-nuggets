@@ -223,4 +223,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 # ts maps and js files
-js/
+*.js
+*.d.ts.map
+*.js.map
+*d.ts
