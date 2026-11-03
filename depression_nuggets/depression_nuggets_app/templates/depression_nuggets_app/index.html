@@ -1,0 +1,26 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game</title>
+		
+		<link rel="stylesheet" href="{% static 'depression_nuggets_app/css/index.css' %}">
+		<!-- to load the cdns for three js, first one is the parent package and the second one is the other subsidary addons -->
+    <script type="importmap">
+			{
+				"imports": {
+						"three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+						"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+				}
+			}
+    </script>
+</head>
+<body>
+    <h3>Hello World</h3>
+
+    <script type="module" src="{% static 'depression_nuggets_app/js/index.js' %}"></script>
+</body>
+</html>
