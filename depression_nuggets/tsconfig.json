@@ -7,7 +7,14 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+
+    // swapped nodenext --> esnext, both use esm6 module/imports but types.d.ts file look up (for type hints) with nodenext
+    // requires imports with a js extension --> "./types.js". However, jolt modules import through "./types" and this
+    // maps to the types.d.ts file only because their module resolution is using "bundler". You can only set to this module
+    // resolution if you're using esnext... nodenext requires a module resolution of "nodenext"
+    "module": "esnext",
+    // allows extensionless imports
+    "moduleResolution": "bundler",
     "target": "esnext",
     "types": [],
     // For nodejs:

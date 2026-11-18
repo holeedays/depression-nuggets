@@ -13,12 +13,15 @@
 			{
 				"imports": {
 						"three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
-						"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+						"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/",
+						"jolt-physics": "https://www.unpkg.com/jolt-physics/dist/jolt-physics.wasm-compat.js"
 				}
 			}
     </script>
 </head>
+
 <body>
+		<div id="django-config" data-static-path="{% static '' %}"></div>
     <script type="module" src="{% static 'depression_nuggets_app/js/app.js' %}"></script>
 </body>
 </html>
