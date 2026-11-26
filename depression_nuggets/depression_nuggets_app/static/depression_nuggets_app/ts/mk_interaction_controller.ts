@@ -1,15 +1,10 @@
 import * as THREE from "three";
+import { InteractionControllerBase } from "./interaction_controller_base.ts";
 import { ThreeToJolt } from "./threeToJolt.ts";
 
 
-export class InteractionController {
+export class MKInteractionController extends InteractionControllerBase {
     private interactionOrigin: THREE.Object3D;
-    private threeToJolt: ThreeToJolt;
-    private sceneObjs: THREE.Object3D[];
-
-    private raycastNear: number;
-    private raycastFar: number;
-
     private activeInteraction: {
         intersection: THREE.Intersection, 
         initialLocalMatrix: THREE.Matrix4
@@ -25,19 +20,18 @@ export class InteractionController {
         threeToJolt: ThreeToJolt,
         sceneObjs: THREE.Object3D[],
 
-        raycastNear: number = 0,
-        raycastFar: number = Number.POSITIVE_INFINITY,
-        crosshairSize: THREE.Vector3 = new THREE.Vector3(0.02, 0.02, 0.02),
-        crosshairDist: number = 1
+        raycastNear: number,
+        raycastFar: number,
+        crosshairSize: THREE.Vector3,
+        crosshairDist: number
     ) {
-        // set instance references
-        this.interactionOrigin = interactionOrigin;
-        this.threeToJolt = threeToJolt;
-        this.sceneObjs = sceneObjs;
+        // init the base class/interface
+        super(threeToJolt, sceneObjs, raycastNear, raycastFar);
 
-        // set params
-        this.raycastNear = raycastNear;
-        this.raycastFar = raycastFar;
+        // init other references
+        this.interactionOrigin = interactionOrigin;
+
+        // init the additional params
         this.crosshairSize = crosshairSize;
         this.crosshairDist = crosshairDist;
     }
@@ -51,7 +45,7 @@ export class InteractionController {
     }
 
     // initializes interaction controls
-    private initInteractionControls(
+    protected initInteractionControls(
         interactionKeys: string[] | null,
         useMouse: boolean
     ): void {
@@ -84,7 +78,7 @@ export class InteractionController {
     }
 
     // creates a crosshair sprite and stores the instance
-    private initCrosshair(): void {
+    protected initCrosshair(): void {
         const djangoConfig: HTMLDivElement | null = document.querySelector("#django-config");
         if (djangoConfig === null) {
             console.warn("Django config doesn't exist");
@@ -116,7 +110,7 @@ export class InteractionController {
     // put this in the render loop
     public update(): void {
         // update raycasting
-        const raycastResults: THREE.Intersection[] = this.updateRaycast();
+        const raycastResults: THREE.Intersection[] = this.updateRaycasts();
         // update the interaction logic based on the raycast results
         this.updateInteractionLogic(raycastResults);
         // update the active interactions (if there are any)
@@ -126,7 +120,10 @@ export class InteractionController {
     }
 
     // handles raycasting in the update loop and returns the results
-    private updateRaycast(): THREE.Intersection[] {
+    protected updateRaycasts(): THREE.Intersection[] {
+        if (this.interactionOrigin === null)
+            return [];
+
         // get the forward vector of the interaction origin 
         const currentForwardDir: THREE.Vector3 = this.interactionOrigin.getWorldDirection(new THREE.Vector3());
         const currentPos: THREE.Vector3 = this.interactionOrigin.position;
@@ -140,11 +137,11 @@ export class InteractionController {
         );
 
         // return the objects the raycaster has intersected with 
-        return raycaster.intersectObjects(this.sceneObjs);
+        return raycaster.intersectObjects(this.interactableSceneObjs);
     }
 
     // handles interaction logic with the given raycasted results
-    private updateInteractionLogic(raycastResults: THREE.Intersection[]): void {
+    protected updateInteractionLogic(raycastResults: THREE.Intersection[]): void {
         // if a key/mouse pressed was toggled in this frame and we are not currently holding anything and the raycast actually hit something
         if (
             this.interactionControlToggled && 
@@ -201,7 +198,7 @@ export class InteractionController {
     }
 
     // updates the active interaction obj (if there is any)
-    private updateActiveInteraction(): void {
+    protected updateActiveInteraction(): void {
         if (this.activeInteraction === null)
             return;
 
@@ -238,6 +235,9 @@ export class InteractionController {
 
     // updates the styling and positioning of the crosshair sprite
     private updateCrosshair(raycastResults: THREE.Intersection[]): void {
+        if (this.interactionOrigin === null)
+            return;
+
         if (this.crosshair === null) {
             console.warn("Cross hair sprite has not been initialized");
             return;

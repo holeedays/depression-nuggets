@@ -1,44 +1,29 @@
 import * as THREE from "three";
+import { MovementControllerBase } from "./movement_controller_base.ts";
 import { clamp } from "./utils.ts";
 
-export class MovementController {
-    private movementObject: THREE.Object3D;
-    private renderer: THREE.WebGLRenderer;
-
+export class MKMovementController extends MovementControllerBase {
     private mouseDelta: THREE.Vector2 = new THREE.Vector2();
     private totalMouseDelta: THREE.Vector2 = new THREE.Vector2();
     private moveKeysPressed: Set<string> = new Set();
     private sprintKeySet: Set<string> = new Set();
     private keysVectorMap: Record<string,THREE.Vector2> = {};
 
-    private timeDelta: {current: number};
-    private verticalSens: number;
-    private horizontalSens: number;
-    private moveSpeed: number;
-    private sprintSpeed: number;
-
     constructor(
-        movementObject: THREE.Object3D,
         renderer: THREE.WebGLRenderer,
+        movementObject: THREE.Object3D,
         timeDelta: {current: number},
                 
-        verticalSens: number = 30,
-        horizontalSens: number = 40,
-        moveSpeed: number = 10,
-        sprintSpeed: number = 50
+        verticalSens: number,
+        horizontalSens: number,
+        moveSpeed: number,
+        sprintSpeed: number
     ) {
-        // set the outside instance references
+        // init the base class/interface
+        super(renderer, movementObject, timeDelta, verticalSens, horizontalSens, moveSpeed, sprintSpeed);
 
-        // this object is the transform we'll be updating and controlling
-        this.movementObject = movementObject;
+        // set the other references
         this.renderer = renderer;
-        this.timeDelta = timeDelta;
-
-        // set the parameters (e.g. sensitivity and movement speed)
-        this.verticalSens = verticalSens;
-        this.horizontalSens = horizontalSens;
-        this.moveSpeed = moveSpeed;
-        this.sprintSpeed = sprintSpeed;
     }
 
     // initialize the movement controller 
@@ -61,7 +46,7 @@ export class MovementController {
     }
 
     // initializes the rotation logic 
-    private initRotationControls(): void {
+    protected initRotationControls(): void {
         // get the canvas element from the renderer
         const canvas: HTMLCanvasElement = this.renderer.domElement;
 
@@ -92,7 +77,7 @@ export class MovementController {
     }
 
     // setups the event listeners and fields needed to control positional movement
-    private initMovementControls(
+    protected initMovementControls(
         keys: {
             UP: string[],
             DOWN: string[],
@@ -146,7 +131,7 @@ export class MovementController {
     }
 
     // updates the rotation/orientation 
-    private updateRotation(): void {
+    protected updateRotation(): void {
         // update the delta based on the mouse delta
         // make sure to clamp the value for the y delta (rotation around the x axis in euler coords) to prevent disorienting the user
         this.totalMouseDelta.y = clamp(
@@ -185,7 +170,7 @@ export class MovementController {
     }
 
     // updates the movement object's position
-    private updatePosition(): void {
+    protected updatePosition(): void {
         // create a boolean that flags whether a sprint key is pressed or not
         let sprintKeyPressed: boolean = false;
         // create a vector that holds the sum of all the vectors pressed
